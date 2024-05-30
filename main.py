@@ -3,6 +3,7 @@ import pdfplumber
 from io import BytesIO
 from get_questions import get_questions
 from keep_alive import keep_alive
+import time
 class QuizBot:
     def __init__(self, token):
         self.bot = telebot.TeleBot(token)
@@ -18,20 +19,21 @@ class QuizBot:
             markup.add(telebot.types.InlineKeyboardButton("تواصل📞", url="https://t.me/RefOoSami"))
             help_text = (
                 "*مرحبًا بك في مركز المساعدة !* 🤖📚\n\n"
-                "إليك الأوامر المتاحة:\n"
-                "/start - يُستخدم لبدء استخدام البوت وعرض الخيارات المتاحة.\n"
-                "/addpremium - يُستخدم لإضافة مستخدمين إلى الخطة المدفوعة، حيث يمكنهم الحصول على ميزات إضافية (مخصص للمشرفين).\n"
-                "/removepremium - يُستخدم لإزالة مستخدمين من الخطة المدفوعة (مخصص للمشرفين).\n\n"
-                "*لإنشاء اختبار، اتبع الخطوات التالية:*\n"
-                "1. أرسل محتوى المحاضرة كنص أو ملف PDF أو صورة.\n"
-                "2. اختر عدد الأسئلة التي تريد تضمينها في الاختبار.\n"
-                "3. حدد مستوى الصعوبة المفضل للأسئلة (سهل، متوسط، أو صعب).\n"
-                "4. انتظر حتى يقوم البوت بإنشاء أسئلة الاختبار استنادًا إلى ما قمت بتحديده.\n\n"
+                "الأوامر المتاحة:\n"
+                "/start - لبدء استخدام البوت وعرض الخيارات.\n"
+                "/addpremium - لإضافة مستخدمين إلى الخطة المدفوعة، لميزات إضافية (للمشرفين).\n"
+                "/removepremium - لإزالة مستخدمين من الخطة المدفوعة (للمشرفين).\n\n"
+                "*لإنشاء اختبار، اتبع الخطوات دي:*\n"
+                "1. ابعت محتوى المحاضرة كنص أو ملف PDF أو صورة.\n"
+                "2. اختار عدد الأسئلة اللي عايزها في الاختبار.\n"
+                "3. حدد مستوى الصعوبة (سهل، متوسط، أو صعب).\n"
+                "4. استنى لحد ما البوت يخلص إنشاء الأسئلة على حسب اختيارك.\n\n"
                 "*ملاحظة:*\n"
-                "- يُرجى التأكد من أن المحتوى المرسل يتعلق بموضوع محدد لضمان جودة الأسئلة المولدة.\n"
-                "- يُنصح بالتحقق من الأسئلة المولدة قبل استخدامها في الاختبار، وذلك لضمان الدقة والصحة.\n"
-                "- إذا كان لديك أي استفسارات أو تحتاج إلى مساعدة، فلا تتردد في التواصل! 😊\n"
+                "- تأكد إن المحتوى اللي بتبعتوه متعلق بموضوع معين علشان جودة الأسئلة تبقى عالية.\n"
+                "- يفضل تراجع الأسئلة قبل استخدامها في الاختبار، علشان تتأكد إنها دقيقة.\n"
+                "- لو عندك أي استفسارات أو محتاج مساعدة، تواصل معانا! 😊\n"
             )
+
             self.bot.send_message(call.message.chat.id, help_text, reply_markup=markup,parse_mode="Markdown")
 
                 
@@ -51,8 +53,8 @@ class QuizBot:
             markup.add(*new_row)
 
             disclaimer_message = (
-                "يرجى ملاحظة أن الأسئلة المولدة قد تحتوي على أخطاء. هذا البوت يستخدم لمساعدتك في إعداد الأسئلة، "
-                "وليس لتوليد الاختبارات بالكامل. ننصح بالتحقق من الأسئلة المولدة بنفسك، وجب التنويه.🚫"
+                "خد بالك إن الأسئلة اللي البوت بيولدها ممكن يكون فيها أخطاء. البوت ده بيساعدك في إعداد الأسئلة، "
+                "مش عشان تولد الاختبارات بالكامل. ياريت تراجع الأسئلة بنفسك.🚫"
             )
 
             self.bot.send_message(
@@ -67,7 +69,7 @@ class QuizBot:
         def start_quiz(call):
             chat_id = call.message.chat.id
             message = """
-                *مرحبًا👋\n\n كيف تفضل إرسال المادة العلمية؟ 🤔*
+                *مرحبًا👋\n\n إزاي تفضل تبعت المادة العلمية؟ 🤔*
             """
 
             markup = telebot.types.InlineKeyboardMarkup()
@@ -81,14 +83,14 @@ class QuizBot:
         def send_lecture_as_text(call):
             chat_id = call.message.chat.id
             self.bot.delete_message(chat_id, call.message.message_id)
-            self.bot.send_message(chat_id, "برجاء ارسال محتوي المحاضرة في رسالة📝\n*يجب ارسال مادة علمية وليس عنوان لموضوع!*",parse_mode='Markdown')
+            self.bot.send_message(chat_id, "برجاء ارسال محتوى المحاضرة في رسالة📝\n*يجب ارسال مادة علمية وليس عنوان لموضوع!*", parse_mode='Markdown')
             self.bot.register_next_step_handler(call.message, self.get_topic_from_text)
 
         @self.bot.callback_query_handler(func=lambda call: call.data == "pdf_lecture")
         def send_lecture_as_pdf(call):
             chat_id = call.message.chat.id
             self.bot.delete_message(chat_id, call.message.message_id)
-            self.bot.send_message(chat_id, "برجاء ارسال ملف PDF🗃️\nيجب ان يكون الملف من نوع PDF لا نقبل صور محولة الي PDF.")
+            self.bot.send_message(chat_id, "برجاء ارسال ملف PDF🗃️\nلازم يكون الملف PDF مش صور محولة لـ PDF.")
             self.bot.register_next_step_handler(call.message, self.get_topic_from_pdf)
             
 
@@ -107,7 +109,7 @@ class QuizBot:
             self.bot.delete_message(call.message.chat.id, call.message.message_id)
             chat_id = call.message.chat.id
             if call.data == "feedback_yes":
-                self.bot.send_message(chat_id, "شكراً جزيلاً على التقييم! 🌟")
+                self.bot.send_message(chat_id, "متشكرين جداً على التقييم! 🌟")
                 self.bot.send_sticker(chat_id, "CAACAgIAAxkBAAIVemYUNaMv-VaGZU18xrZTh-_z3xTIAAIEAQACVp29Ct4E0XpmZvdsNAQ")
                 self.bot.send_message(854578633, f"المستخدم {chat_id} قيم البوت بانه جيد")
             elif call.data == "feedback_no":
@@ -117,7 +119,7 @@ class QuizBot:
 
                 self.bot.send_message(
                     chat_id,
-                    "نأسف لسماع ذلك. إذا كان لديك أي ملاحظات أو اقتراحات، فلا تتردد في مشاركتها معنا. 🙏",
+                    "احنا آسفين إنك مش مبسوط. لو عندك أي ملاحظات أو اقتراحات، متترددش تشاركها معانا. 🙏",
                     reply_markup=contact_button
                 )
                 self.bot.send_sticker(chat_id, "CAACAgIAAxkBAAIVfGYUNnYBOTnkuw982--5-LHV74ItAALzAANWnb0KahvrxMf6lv40BA")
@@ -126,12 +128,12 @@ class QuizBot:
 
     def get_topic_from_text(self, message):
         if message.text is None:
-            self.bot.send_message(message.chat.id, "لم يتم إدخال نص. برجاء إدخال نص موضوع.")
+            self.bot.send_message(message.chat.id, "مفيش نص مدخل. برجاء إدخال نص الموضوع.")
             self.bot.register_next_step_handler(message, self.get_topic_from_text)
             return
 
         if len(message.text) < 60:  # Adjust the threshold as needed
-            self.bot.send_message(message.chat.id, "المحتوى الذي أدخلته قصير جدًا. برجاء إدخال محتوى أطول.")
+            self.bot.send_message(message.chat.id, "المحتوى اللي كتبته قصير جدًا. برجاء إدخال محتوى أطول.")
             self.bot.register_next_step_handler(message, self.get_topic_from_text)
             return
 
@@ -142,18 +144,18 @@ class QuizBot:
     def get_topic_from_pdf(self, message):
         if message.document:
             if message.document.mime_type == 'application/pdf':
-                initial_reply = self.bot.reply_to(message, 'جاري استخراج البيانات برجاء الانتظار⌛')
+                initial_reply = self.bot.reply_to(message, 'جاري استخراج البيانات، استنى شوية⌛')
                 file_info = self.bot.get_file(message.document.file_id)
                 downloaded_file = self.bot.download_file(file_info.file_path)
                 with pdfplumber.open(BytesIO(downloaded_file)) as pdf:
                     page_count = len(pdf.pages)
                     self.bot.delete_message(message.chat.id, initial_reply.message_id)
-                    get_num_msg = (f"تم استخراج *{page_count}* صفحة من الملف. الترقيم بالنسبة لنا يبدء من الصفحة الاولي بغض النظر عن ترقيم الصفحات في الملف"
-                                    "\n*يُرجى تحديد الصفحات المطلوبة، مثال: 17-13. *")
+                    get_num_msg = (f"تم استخراج *{page_count}* صفحة من الملف. الترقيم بالنسبة لينا بيبدأ من الصفحة الأولى بغض النظر عن ترقيم الصفحات في الملف"
+                                "\n*يرجى تحديد الصفحات المطلوبة، مثال: 17-13. *")
                     self.bot.reply_to(message, get_num_msg,parse_mode='Markdown')
                     self.bot.register_next_step_handler(message, lambda msg: self.extract_text_from_pages(msg, pdf))
             else:
-                self.bot.reply_to(message, "الملف الذي قمت بإرساله ليس من نوع PDF. برجاء إرسال ملف PDF.")
+                self.bot.reply_to(message, "الملف اللي بعته مش PDF. برجاء إرسال ملف PDF.")
                 self.bot.register_next_step_handler(message, self.get_topic_from_pdf)
         else:
             self.bot.reply_to(message, "الرجاء إرسال ملف PDF.")
@@ -198,13 +200,18 @@ class QuizBot:
         markup.add(
             telebot.types.InlineKeyboardButton("10", callback_data="10"),
             telebot.types.InlineKeyboardButton("5", callback_data="5"),
-            telebot.types.InlineKeyboardButton("40 (Pro)🌟", callback_data="40"),
-            telebot.types.InlineKeyboardButton("20 (Pro)🌟", callback_data="20"),
-            telebot.types.InlineKeyboardButton("80 (Pro)🌟", callback_data="80"),
-            telebot.types.InlineKeyboardButton("60 (Pro)🌟", callback_data="60")
+            telebot.types.InlineKeyboardButton("40", callback_data="40"),
+            telebot.types.InlineKeyboardButton("20", callback_data="20"),
+            telebot.types.InlineKeyboardButton("80", callback_data="80"),
+            telebot.types.InlineKeyboardButton("60", callback_data="60")
         )
         # Send the message with the buttons
-        sent_message = self.bot.send_message(message.chat.id, "*اختر عدد الأسئلة المطلوبة *😌\nقد يختلف عدد الاسئلة حسب كمية المحتوي وصعوبه الاسئلة", reply_markup=markup,parse_mode='Markdown')
+        sent_message = self.bot.send_message(
+            message.chat.id, 
+            "*اختار عدد الأسئلة اللي محتاجها *😌\nممكن عدد الاسئلة يختلف حسب كمية المحتوى وصعوبة الأسئلة", 
+            reply_markup=markup, 
+            parse_mode='Markdown'
+        )
 
     def get_difficulty_level(self, message):
         markup = telebot.types.InlineKeyboardMarkup()
@@ -218,18 +225,24 @@ class QuizBot:
         )
         self.bot.delete_message(message.chat.id, message.message_id)
         # Send the message with the buttons
-        self.bot.send_message(message.chat.id, "اختر مستوي الصعوبه 🏋\nأنصح باختيار *ميكس* لإنشاء اسئلة بمستويات مختلفه🎉", reply_markup=markup,parse_mode="Markdown")
+        self.bot.send_message(
+            message.chat.id, 
+            "اختار مستوى الصعوبة 🏋\nأنصح باختيار *ميكس* لإنشاء أسئلة بمستويات مختلفة🎉", 
+            reply_markup=markup, 
+            parse_mode="Markdown"
+        )
         
         
     def create_quiz(self, message):
         self.bot.delete_message(message.chat.id, message.message_id)
-        wait_message = self.bot.send_message(message.chat.id, "*جارٍ إنشاء الأسئلة* 🫣\n🔹قد يختلف عدد الأسئلة اعتمادًا على المحتوى المقدم\n🔹برجاء مراجعة الاسئلة هناك نسبة خطأ!\n🔹برجاء الانتظار، قد يستغرق الأمر مدة تصل إلى *5* دقائق...", parse_mode='Markdown')
+        wait_message = self.bot.send_message(
+        message.chat.id,"*جارٍ إنشاء الأسئلة* 🫣\n🔹ممكن عدد الأسئلة يختلف حسب المحتوى\n🔹راجع الأسئلة لإنه ممكن يكون فيها نسبة خطأ!\n🔹استنى شوية، ممكن تاخد لحد *5* دقايق...", parse_mode='Markdown')
         loading_animation = self.bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAIU1GYOk5jWvCvtykd7TZkeiFFZRdUYAAIjAAMoD2oUJ1El54wgpAY0BA")
         
         def send_error_message():
             self.bot.delete_message(message.chat.id, wait_message.message_id)
             self.bot.delete_message(message.chat.id, loading_animation.message_id)
-            self.bot.send_message(message.chat.id, "حدث خطأ أثناء إنشاء الأسئلة. برجاء المحاولة مرة أخرى.")
+            self.bot.send_message(message.chat.id, "حصلت مشكلة أثناء إنشاء الأسئلة. حاول تاني لو سمحت.")
         
         if self.DIFF == "mixed":
             for difficulty in ["easy", "medium", "hard"]:
@@ -252,7 +265,7 @@ class QuizBot:
                     "hard": "صعب"
                 }
                 diff_level = diff_levels.get(difficulty)
-                self.bot.send_message(message.chat.id, f"اسئلة ذات مستوي صعوبه *{diff_level}*🎉", parse_mode='Markdown')
+                self.bot.send_message(message.chat.id, f"أسئلة بمستوى صعوبة *{diff_level}*🎉", parse_mode='Markdown')
                 
                 for question_number, question_data in parsed_data.items():
                     try:
@@ -315,12 +328,7 @@ class QuizBot:
             except Exception as e:
                 print(f"An error occurred: {e}")
         
-        feedback_message = self.bot.send_message(
-            message.chat.id,
-            "شكراً لاستخدام البوت! هل يمكنك تقييم الاختبار؟\nيساعدنا تقييمك في تحسين وتطوير البوت😃",
-            reply_markup=self.get_feedback_markup()
-        )
-
+        feedback_message = self.bot.send_message(message.chat.id,"شكراً لاستخدام البوت! ممكن تقيم الاختبار؟\nتقييمك هيساعدنا نحسن و نطور البوت😃",reply_markup=self.get_feedback_markup())
     def get_feedback_markup(self):
         # Create an inline keyboard markup with two buttons: Yes and No
         markup = telebot.types.InlineKeyboardMarkup()
@@ -335,16 +343,18 @@ class QuizBot:
         last_name = user.last_name
         user_id = user.id
         username = user.username
-        user_details = f"New user started ChatBot:\n\nUsername: @{username}\nFirst Name: {first_name}\nLast Name: {last_name}\nUser ID: {user_id}"
+        user_details = f"مستخدم جديد بدأ يستخدم البوت:\n\nاسم المستخدم: @{username}\nالاسم الأول: {first_name}\nالاسم الأخير: {last_name}\nالرقم التعريفي: {user_id}"
         self.bot.send_message(chat_id, user_details)
         
     
 if __name__ == "__main__":
-    bot_token = "6306869044:AAGh79xhZ4tOWNOPjk29r6uWvgPTg-Wyc2s"
+    keep_alive()
+    bot_token = "6982141096:AAFpEspslCkO0KWNbONnmWjUU_87jib__g8"
     while True:
         try:
-            keep_alive()
             quiz_bot = QuizBot(bot_token)
             quiz_bot.start()
-        except:
-            pass
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            # You might want to add a delay before retrying to avoid hitting API rate limits
+            time.sleep(5)  # 5 seconds delay before retrying
