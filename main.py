@@ -196,19 +196,17 @@ class QuizBot:
             
     def get_num_questions(self, message):
         markup = telebot.types.InlineKeyboardMarkup()
-        markup.row_width = 2
-        markup.add(
-            telebot.types.InlineKeyboardButton("10", callback_data="10"),
-            telebot.types.InlineKeyboardButton("5", callback_data="5"),
-            telebot.types.InlineKeyboardButton("40", callback_data="40"),
-            telebot.types.InlineKeyboardButton("20", callback_data="20"),
-            telebot.types.InlineKeyboardButton("80", callback_data="80"),
-            telebot.types.InlineKeyboardButton("60", callback_data="60")
-        )
+        markup.row_width = 3
+        markup.add(telebot.types.InlineKeyboardButton("5️⃣", callback_data="5"),
+                   telebot.types.InlineKeyboardButton("🔟", callback_data="10"),
+                   telebot.types.InlineKeyboardButton("2️⃣0️⃣", callback_data="20"))
+        markup.add(telebot.types.InlineKeyboardButton("4️⃣0️⃣", callback_data="40"),
+                   telebot.types.InlineKeyboardButton("6️⃣0️⃣", callback_data="60"),
+                   telebot.types.InlineKeyboardButton("8️⃣0️⃣", callback_data="80"))
         # Send the message with the buttons
         sent_message = self.bot.send_message(
             message.chat.id, 
-            "*اختار عدد الأسئلة اللي محتاجها *😌\nممكن عدد الاسئلة يختلف حسب كمية المحتوى وصعوبة الأسئلة", 
+            "*أختار عدد الأسئلة المطلوبة في الاختبار*😌\nممكن عدد الاسئلة يختلف حسب كمية المحتوى وصعوبة الأسئلة", 
             reply_markup=markup, 
             parse_mode='Markdown'
         )
@@ -217,10 +215,10 @@ class QuizBot:
         markup = telebot.types.InlineKeyboardMarkup()
         markup.row_width = 2
         markup.add(
-            telebot.types.InlineKeyboardButton("متوسط🤕", callback_data="medium"),
-            telebot.types.InlineKeyboardButton("سهل😌", callback_data="easy"),
-            telebot.types.InlineKeyboardButton("ميكس💀", callback_data="mixed"),
-            telebot.types.InlineKeyboardButton("صعب😩", callback_data="hard"),
+            telebot.types.InlineKeyboardButton("متوسط😌", callback_data="medium"),
+            telebot.types.InlineKeyboardButton("سهل💤", callback_data="easy"),
+            telebot.types.InlineKeyboardButton("مزيج🤔", callback_data="mixed"),
+            telebot.types.InlineKeyboardButton("صعب😓", callback_data="hard"),
 
         )
         self.bot.delete_message(message.chat.id, message.message_id)
@@ -231,7 +229,23 @@ class QuizBot:
             reply_markup=markup, 
             parse_mode="Markdown"
         )
-        
+
+
+
+    def get_num_questions(self, message):
+        markup = telebot.types.InlineKeyboardMarkup()
+        markup.row_width = 3
+        markup.add(telebot.types.InlineKeyboardButton("5️⃣", callback_data="5"),
+                   telebot.types.InlineKeyboardButton("🔟", callback_data="10"),
+                   telebot.types.InlineKeyboardButton("2️⃣0️⃣", callback_data="20"))
+        markup.add(telebot.types.InlineKeyboardButton("4️⃣0️⃣", callback_data="40"),
+                   telebot.types.InlineKeyboardButton("6️⃣0️⃣", callback_data="60"),
+                   telebot.types.InlineKeyboardButton("8️⃣0️⃣", callback_data="80"))
+        self.bot.send_message(message.chat.id, "أختار عدد الأسئلة المطلوبة في الاختبار", reply_markup=markup)
+
+
+
+
         
     def create_quiz(self, message):
         self.bot.delete_message(message.chat.id, message.message_id)
@@ -307,7 +321,6 @@ class QuizBot:
                         options = question_data["options"]
                         correct_answer = question_data["answer"]
                     except KeyError:
-                        print(question_data)
                         continue
                     
                     options_list = [f"{key}. {value}" for key, value in options.items()]
@@ -315,7 +328,7 @@ class QuizBot:
                     if any(len(option) > 100 for option in options_list):
                         continue
                     
-                    poll_message = self.bot.send_poll(
+                    self.bot.send_poll(
                         chat_id=message.chat.id,
                         question=question_text,
                         options=options_list,
@@ -325,36 +338,31 @@ class QuizBot:
                         open_period=0,
                         protect_content=False
                     )
-            except Exception as e:
-                print(f"An error occurred: {e}")
+            except:
+                pass
         
-        feedback_message = self.bot.send_message(message.chat.id,"شكراً لاستخدام البوت! ممكن تقيم الاختبار؟\nتقييمك هيساعدنا نحسن و نطور البوت😃",reply_markup=self.get_feedback_markup())
-    def get_feedback_markup(self):
-        # Create an inline keyboard markup with two buttons: Yes and No
+        self.bot.send_message(message.chat_id, "لو سمحت ممكن تقيم البوت؟ 🌟", reply_markup=self.feedback_options())
+
+    def send_user_details(self, admin_id, user):
+        user_details = (
+            f"User Details:\n"
+            f"Username: {user.username}\n"
+            f"Full Name: {user.first_name} {user.last_name}\n"
+            f"User ID: {user.id}\n"
+            f"Language Code: {user.language_code}\n"
+        )
+        self.bot.send_message(admin_id, user_details)
+
+    def feedback_options(self):
         markup = telebot.types.InlineKeyboardMarkup()
-        markup.row_width = 2
         markup.add(
-            telebot.types.InlineKeyboardButton("جيد ✅", callback_data="feedback_yes"),
-            telebot.types.InlineKeyboardButton("غير مقبول ❌", callback_data="feedback_no")
+            telebot.types.InlineKeyboardButton("👍", callback_data="feedback_yes"),
+            telebot.types.InlineKeyboardButton("👎", callback_data="feedback_no")
         )
         return markup
-    def send_user_details(self, chat_id, user):
-        first_name = user.first_name
-        last_name = user.last_name
-        user_id = user.id
-        username = user.username
-        user_details = f"مستخدم جديد بدأ يستخدم البوت:\n\nاسم المستخدم: @{username}\nالاسم الأول: {first_name}\nالاسم الأخير: {last_name}\nالرقم التعريفي: {user_id}"
-        self.bot.send_message(chat_id, user_details)
-        
-    
+
 if __name__ == "__main__":
     keep_alive()
-    bot_token = "6982141096:AAFpEspslCkO0KWNbONnmWjUU_87jib__g8"
     while True:
-        try:
-            quiz_bot = QuizBot(bot_token)
-            quiz_bot.start()
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            # You might want to add a delay before retrying to avoid hitting API rate limits
-            time.sleep(5)  # 5 seconds delay before retrying
+        try:QuizBot("6982141096:AAFpEspslCkO0KWNbONnmWjUU_87jib__g8").start()
+        except:pass
