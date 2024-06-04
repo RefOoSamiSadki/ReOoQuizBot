@@ -338,7 +338,7 @@ class QuizBot:
         return markup
     def send_user_details(self, admin_id, user):
         user_details = (
-            f"Username: {user.username}\n"
+            f"Username: @{user.username}\n"
             f"Full Name: {user.first_name} {user.last_name}\n"
             f"User ID: {user.id}\n"
             f"Language Code: {user.language_code}\n"
