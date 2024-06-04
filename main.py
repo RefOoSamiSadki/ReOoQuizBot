@@ -74,8 +74,8 @@ class QuizBot:
 
             markup = telebot.types.InlineKeyboardMarkup()
             markup.row_width = 1
-            markup.add(telebot.types.InlineKeyboardButton("نص📝", callback_data="text_lecture"),
-                        telebot.types.InlineKeyboardButton("🗃️PDF", callback_data="pdf_lecture"))
+            markup.add(telebot.types.InlineKeyboardButton("🗃️PDF", callback_data="pdf_lecture"),
+                        telebot.types.InlineKeyboardButton("نص📝", callback_data="text_lecture"))
             self.bot.delete_message(chat_id, call.message.message_id)
             self.bot.send_message(chat_id, message, reply_markup=markup,parse_mode='Markdown')
 
@@ -197,12 +197,12 @@ class QuizBot:
     def get_num_questions(self, message):
         markup = telebot.types.InlineKeyboardMarkup()
         markup.row_width = 3
-        markup.add(telebot.types.InlineKeyboardButton("5️⃣", callback_data="5"),
-                   telebot.types.InlineKeyboardButton("🔟", callback_data="10"),
-                   telebot.types.InlineKeyboardButton("2️⃣0️⃣", callback_data="20"))
-        markup.add(telebot.types.InlineKeyboardButton("4️⃣0️⃣", callback_data="40"),
-                   telebot.types.InlineKeyboardButton("6️⃣0️⃣", callback_data="60"),
-                   telebot.types.InlineKeyboardButton("8️⃣0️⃣", callback_data="80"))
+        markup.add(telebot.types.InlineKeyboardButton("20", callback_data="20"),
+                   telebot.types.InlineKeyboardButton("10", callback_data="10"),
+                   telebot.types.InlineKeyboardButton("5", callback_data="5"))
+        markup.add(telebot.types.InlineKeyboardButton("80", callback_data="80"),
+                   telebot.types.InlineKeyboardButton("60", callback_data="60"),
+                   telebot.types.InlineKeyboardButton("40", callback_data="40"))
         # Send the message with the buttons
         sent_message = self.bot.send_message(
             message.chat.id, 
@@ -229,33 +229,18 @@ class QuizBot:
             reply_markup=markup, 
             parse_mode="Markdown"
         )
-
-
-
-    def get_num_questions(self, message):
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.row_width = 3
-        markup.add(telebot.types.InlineKeyboardButton("5️⃣", callback_data="5"),
-                   telebot.types.InlineKeyboardButton("🔟", callback_data="10"),
-                   telebot.types.InlineKeyboardButton("2️⃣0️⃣", callback_data="20"))
-        markup.add(telebot.types.InlineKeyboardButton("4️⃣0️⃣", callback_data="40"),
-                   telebot.types.InlineKeyboardButton("6️⃣0️⃣", callback_data="60"),
-                   telebot.types.InlineKeyboardButton("8️⃣0️⃣", callback_data="80"))
-        self.bot.send_message(message.chat.id, "أختار عدد الأسئلة المطلوبة في الاختبار", reply_markup=markup)
-
-
-
-
         
     def create_quiz(self, message):
         self.bot.delete_message(message.chat.id, message.message_id)
         wait_message = self.bot.send_message(
-        message.chat.id,"*جارٍ إنشاء الأسئلة* 🫣\n🔹ممكن عدد الأسئلة يختلف حسب المحتوى\n🔹راجع الأسئلة لإنه ممكن يكون فيها نسبة خطأ!\n🔹استنى شوية، ممكن تاخد لحد *5* دقايق...", parse_mode='Markdown')
+        message.chat.id,"*جارٍ إنشاء الأسئلة* 🫣\n🔹ممكن عدد الأسئلة يختلف حسب المحتوى\n🔹راجع الأسئلة لإنه ممكن يكون فيها نسبة خطأ!\n🔹استنى شوية، ممكن أخد لحد *5* دقايق...", parse_mode='Markdown')
         loading_animation = self.bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAIU1GYOk5jWvCvtykd7TZkeiFFZRdUYAAIjAAMoD2oUJ1El54wgpAY0BA")
         
         def send_error_message():
-            self.bot.delete_message(message.chat.id, wait_message.message_id)
-            self.bot.delete_message(message.chat.id, loading_animation.message_id)
+            try:
+                self.bot.delete_message(message.chat.id, wait_message.message_id)
+                self.bot.delete_message(message.chat.id, loading_animation.message_id)
+            except:pass
             self.bot.send_message(message.chat.id, "حصلت مشكلة أثناء إنشاء الأسئلة. حاول تاني لو سمحت.")
         
         if self.DIFF == "mixed":
