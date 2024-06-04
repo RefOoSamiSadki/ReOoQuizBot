@@ -225,7 +225,7 @@ class QuizBot:
         # Send the message with the buttons
         self.bot.send_message(
             message.chat.id, 
-            "اختار مستوى الصعوبة 🏋\nأنصح باختيار *ميكس* لإنشاء أسئلة بمستويات مختلفة🎉", 
+            "اختار مستوى الصعوبة 🏋", 
             reply_markup=markup, 
             parse_mode="Markdown"
         )
