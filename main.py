@@ -11,7 +11,6 @@ class QuizBot:
         self.NUM_QUESTIONS = None
         self.DIFF = None
 
-
     def start(self):
         @self.bot.callback_query_handler(func=lambda call: call.data == "help")
         def send_help_message(call):
@@ -24,12 +23,12 @@ class QuizBot:
                 "/addpremium - لإضافة مستخدمين إلى الخطة المدفوعة، لميزات إضافية (للمشرفين).\n"
                 "/removepremium - لإزالة مستخدمين من الخطة المدفوعة (للمشرفين).\n\n"
                 "*لإنشاء اختبار، اتبع الخطوات دي:*\n"
-                "1. ابعت محتوى المحاضرة كنص أو ملف PDF أو صورة.\n"
+                "1. ابعت محتوى المحاضرة كنص أو ملف PDF.\n"
                 "2. اختار عدد الأسئلة اللي عايزها في الاختبار.\n"
                 "3. حدد مستوى الصعوبة (سهل، متوسط، أو صعب).\n"
                 "4. استنى لحد ما البوت يخلص إنشاء الأسئلة على حسب اختيارك.\n\n"
                 "*ملاحظة:*\n"
-                "- تأكد إن المحتوى اللي بتبعتوه متعلق بموضوع معين علشان جودة الأسئلة تبقى عالية.\n"
+                "- تأكد إن المحتوى اللي بتبعته متعلق بموضوع معين علشان جودة الأسئلة تبقى عالية.\n"
                 "- يفضل تراجع الأسئلة قبل استخدامها في الاختبار، علشان تتأكد إنها دقيقة.\n"
                 "- لو عندك أي استفسارات أو محتاج مساعدة، تواصل معانا! 😊\n"
             )
@@ -204,9 +203,9 @@ class QuizBot:
                    telebot.types.InlineKeyboardButton("60", callback_data="60"),
                    telebot.types.InlineKeyboardButton("40", callback_data="40"))
         # Send the message with the buttons
-        sent_message = self.bot.send_message(
+        self.bot.send_message(
             message.chat.id, 
-            "*أختار عدد الأسئلة المطلوبة في الاختبار*😌\nممكن عدد الاسئلة يختلف حسب كمية المحتوى وصعوبة الأسئلة", 
+            "*أختار عدد الأسئلة المطلوبة في الاختبار*😌\nممكن عدد الاسئلة يختلف حسب كمية المحتوى ودرجة الصعوبه", 
             reply_markup=markup, 
             parse_mode='Markdown'
         )
@@ -230,6 +229,7 @@ class QuizBot:
             parse_mode="Markdown"
         )
         
+        
     def create_quiz(self, message):
         self.bot.delete_message(message.chat.id, message.message_id)
         wait_message = self.bot.send_message(
@@ -237,10 +237,8 @@ class QuizBot:
         loading_animation = self.bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAIU1GYOk5jWvCvtykd7TZkeiFFZRdUYAAIjAAMoD2oUJ1El54wgpAY0BA")
         
         def send_error_message():
-            try:
-                self.bot.delete_message(message.chat.id, wait_message.message_id)
-                self.bot.delete_message(message.chat.id, loading_animation.message_id)
-            except:pass
+            self.bot.delete_message(message.chat.id, wait_message.message_id)
+            self.bot.delete_message(message.chat.id, loading_animation.message_id)
             self.bot.send_message(message.chat.id, "حصلت مشكلة أثناء إنشاء الأسئلة. حاول تاني لو سمحت.")
         
         if self.DIFF == "mixed":
@@ -295,10 +293,11 @@ class QuizBot:
             if not isinstance(parsed_data, dict):
                 send_error_message()
                 return
-            
-            self.bot.delete_message(message.chat.id, wait_message.message_id)
-            self.bot.delete_message(message.chat.id, loading_animation.message_id)
-            
+            try:
+                self.bot.delete_message(message.chat.id, wait_message.message_id)
+                self.bot.delete_message(message.chat.id, loading_animation.message_id)
+            except:
+                pass
             try:
                 for question_number, question_data in parsed_data.items():
                     try:
@@ -306,6 +305,7 @@ class QuizBot:
                         options = question_data["options"]
                         correct_answer = question_data["answer"]
                     except KeyError:
+                        print(question_data)
                         continue
                     
                     options_list = [f"{key}. {value}" for key, value in options.items()]
@@ -313,7 +313,7 @@ class QuizBot:
                     if any(len(option) > 100 for option in options_list):
                         continue
                     
-                    self.bot.send_poll(
+                    poll_message = self.bot.send_poll(
                         chat_id=message.chat.id,
                         question=question_text,
                         options=options_list,
@@ -326,26 +326,26 @@ class QuizBot:
             except:
                 pass
         
-        self.bot.send_message(message.chat_id, "لو سمحت ممكن تقيم البوت؟ 🌟", reply_markup=self.feedback_options())
-
+        self.bot.send_message(message.chat.id,"لو سمحت ممكن تقيم البوت؟ 🌟",reply_markup=self.get_feedback_markup())
+    def get_feedback_markup(self):
+        # Create an inline keyboard markup with two buttons: Yes and No
+        markup = telebot.types.InlineKeyboardMarkup()
+        markup.row_width = 2
+        markup.add(
+            telebot.types.InlineKeyboardButton("👍", callback_data="feedback_yes"),
+            telebot.types.InlineKeyboardButton("👎", callback_data="feedback_no")
+        )
+        return markup
     def send_user_details(self, admin_id, user):
         user_details = (
-            f"User Details:\n"
             f"Username: {user.username}\n"
             f"Full Name: {user.first_name} {user.last_name}\n"
             f"User ID: {user.id}\n"
             f"Language Code: {user.language_code}\n"
         )
         self.bot.send_message(admin_id, user_details)
-
-    def feedback_options(self):
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(
-            telebot.types.InlineKeyboardButton("👍", callback_data="feedback_yes"),
-            telebot.types.InlineKeyboardButton("👎", callback_data="feedback_no")
-        )
-        return markup
-
+        
+    
 if __name__ == "__main__":
     keep_alive()
     while True:
