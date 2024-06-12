@@ -285,7 +285,8 @@ class QuizBot:
                         type="quiz",
                         correct_option_id=list(options.keys()).index(correct_answer),
                         open_period=0,
-                        protect_content=False
+                        protect_content=False,
+                        explanation="AI Generated Question!, Code By RefOo❤️✨",
                     )
         else:
             parsed_data = get_questions(self.DIFF, self.NUM_QUESTIONS, self.TOPIC)
@@ -321,7 +322,8 @@ class QuizBot:
                         type="quiz",
                         correct_option_id=list(options.keys()).index(correct_answer),
                         open_period=0,
-                        protect_content=False
+                        protect_content=False,
+                        explanation="AI Generated Question!, Code By RefOo❤️✨",
                     )
             except:
                 pass
